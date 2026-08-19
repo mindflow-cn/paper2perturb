@@ -1,0 +1,4 @@
+interface:
+  display_name: "Paper to Markdown"
+  short_description: "Convert paper PDFs to Markdown and figures"
+  default_prompt: "Use $paper-to-markdown to convert this scientific paper PDF into searchable Markdown and extracted figures."

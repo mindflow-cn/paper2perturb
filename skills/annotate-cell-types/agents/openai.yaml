@@ -1,0 +1,4 @@
+interface:
+  display_name: "Annotate Cell Types"
+  short_description: "Annotate and standardize single-cell labels"
+  default_prompt: "Use $annotate-cell-types to annotate and standardize the cell types in this single-cell dataset."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Extract Perturbation"
+  short_description: "Extract structured perturbation paper evidence"
+  default_prompt: "Use $extract-perturbation to extract structured single-cell drug perturbation metadata from this paper."

@@ -1,0 +1,21 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Paper2Perturb runtime data
+papers/
+paper_md/
+raw_data/
+prepared/
+data/
+h5ad/
+validation_results/
+tmp/
+*.h5ad
+*.xlsx
+*.xlsx.bak*
+*.log
+.batch_*

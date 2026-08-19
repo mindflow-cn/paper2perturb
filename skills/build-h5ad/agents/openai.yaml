@@ -1,0 +1,4 @@
+interface:
+  display_name: "Build H5AD"
+  short_description: "Build standardized perturbation h5ad files"
+  default_prompt: "Use $build-h5ad to download this public dataset and build standardized perturbation h5ad files."

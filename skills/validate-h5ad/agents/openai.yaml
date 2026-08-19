@@ -1,0 +1,4 @@
+interface:
+  display_name: "Validate H5AD"
+  short_description: "Validate h5ad and metadata consistency"
+  default_prompt: "Use $validate-h5ad to check consistency across these h5ad files, test_case.json, and result.xlsx."

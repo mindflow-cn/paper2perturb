@@ -1,0 +1,4 @@
+interface:
+  display_name: "Validate Metadata"
+  short_description: "Validate metadata rules and paper evidence"
+  default_prompt: "Use $validate-metadata to check this perturbation metadata and verify its claims against the source paper."
