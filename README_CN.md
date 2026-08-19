@@ -29,7 +29,7 @@ Paper2Perturb 从科学论文和公共单细胞数据仓库中提取扰动实验
 | `validate-metadata` | 同时执行字段规则检查和论文证据核验。 |
 | `validate-h5ad` | 检查 h5ad、`test_case.json` 和表格元数据的一致性。 |
 
-原来的 `check-csv` 不拆分，统一重命名为 `validate-metadata`。确定性规则检查是第一阶段，LLM 论文证据核验是第二阶段，两者共同完成一次元数据审计。
+`validate-metadata` 同时包含确定性字段校验和论文证据核验。这是一次元数据审计的两个阶段，因此不拆分成两个 skill。
 
 ## 快速开始
 
@@ -67,9 +67,27 @@ Qwen_API_KEY=your-dashscope-api-key
 使用 $validate-metadata 对照本地论文核验 PMID 34591417。
 ```
 
+Agent 客户端也可以根据自然语言请求自动触发相应 skill。
+
 每个 skill 的完整输入、输出和执行规则见对应目录中的 `SKILL.md`。
 
-修改 skill 后运行项目自带的基础校验：
+## 仓库结构
+
+```text
+paper2perturb/
+├── skills/                  # Agent skills 及其实现
+├── scripts/                 # 项目维护与安装工具
+├── README.md
+├── README_CN.md
+├── requirements.txt
+└── .env.example
+```
+
+论文、下载的表达矩阵、h5ad 文件、结果表格、日志和 API 凭据等运行时内容不会纳入版本控制。
+
+## 参与贡献
+
+每个 skill 应保持自包含：执行说明写入 `SKILL.md`，可复用代码放在 `scripts/`，需要按需读取的详细领域规则放在 `references/`。提交修改前请运行 `AGENTS.md` 中列出的校验命令。基础项目校验命令为：
 
 ```bash
 python3 scripts/validate_project.py
