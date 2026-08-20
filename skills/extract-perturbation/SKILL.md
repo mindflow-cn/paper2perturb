@@ -549,7 +549,7 @@ For every case, the `notes` field should briefly confirm testability or flag the
 
 **dose_groups**: **Always write actual dose values regardless of `perturb_var`.** Even when `perturb_var` is `time` or `resistance_status`, if the experiment involves drug treatment at specific doses, record those doses here. List only the dose groups actually compared in this case, not all doses in the experiment. **Format as dose value with unit** (e.g. `["1.0 uM", "2.0 uM", "4.0 uM"]`), not paper labels (e.g. `["T1", "T2", "T4"]`). **Use a narrow dose range** — select the 2-3 highest doses where the expression change is clearest, not the full dose ladder. If the experiment genuinely has no dose component (e.g. purely untreated comparison), use `[]`.
 
-**original_statement**: 原封不动地将论文原话复制过来，不要同义转述或者做任何删改。Copy the paper's exact wording from the figure caption or results text character by character — no paraphrasing, no rewriting, no deletion or modification of any kind. This is NOT a field for synthesized summaries or templated sentences with gene names swapped in. Use this field to anchor the case to specific paper evidence. When multiple genes are merged into one case row, include the quote(s) that cover all genes, separated by newlines if from different parts of the paper.
+**original_statement**: Copy the paper's exact wording from the figure caption or results text character by character — no paraphrasing, no rewriting, no deletion or modification of any kind. This is NOT a field for synthesized summaries or templated sentences with gene names swapped in. Use this field to anchor the case to specific paper evidence. When multiple genes are merged into one case row, include the quote(s) that cover all genes, separated by newlines if from different parts of the paper.
 
 **time_groups**: For non-time-response cases, use `"[]"` (empty JSON array string). For time-course experiments, each case should focus on the specific time point(s) where the expression change is most pronounced. **All time_groups values must be expressed in day units.** Convert hours to days (e.g., 24h → `"1 day"`, 72h → `"3 day"`), weeks to days (e.g., 2 weeks → `"14 day"`). A gene that peaks at day 2 should have `time_groups: ["2 day"]`, not `["D1","D2","D4","D9","D11"]`. Use `time_mode: "single"` with a narrow time window. Only use `time_mode: "multi"` when the paper explicitly demonstrates sustained change across all listed time points with no temporal specificity.
 
@@ -682,29 +682,29 @@ Print a summary:
 | Field | Type | Source | Description |
 |-------|------|--------|-------------|
 | benchmark_id | string | **generated** | `<PMID>_<Index:02d>` via `gen-benchmark-id` (Index starts at 01 per PMID) |
-| pmid | string | **paper** | 来源文献 PMID |
-| paper_doi | string | **pubmed API** | 来源文献 DOI |
-| paper_title | string | **pubmed API** | 论文标题 |
-| year | int | **pubmed API** | 发表年份 |
-| journal | string | **pubmed API** | 期刊名 |
-| dataset_accession | string | **paper** | 主数据编号，必须使用 `/build-h5ad` 可识别的格式：GEO→`GSE\d+`；ArrayExpress→`E-MTAB-\d+` 等；Zenodo→`Zenodo \d+`；CELLxGENE→`cellxgene:<uuid>`；GitHub→`GitHub: owner/repo`；其他→`仓库名: 编号`。优先用 subseries 或子数据集 |
-| secondary_accession | string | **paper / API** | BioProject ID（PRJNAxxxxxx）或其他项目级编号；非 GEO 仓库可从论文或仓库页面获取；不用 superseries |
+| pmid | string | **paper** | PMID of the source paper |
+| paper_doi | string | **pubmed API** | DOI of the source paper |
+| paper_title | string | **pubmed API** | Title of the paper |
+| year | int | **pubmed API** | Publication year |
+| journal | string | **pubmed API** | Journal name |
+| dataset_accession | string | **paper** | Primary data accession; must use a format recognized by `/build-h5ad`: GEO→`GSE\d+`; ArrayExpress→`E-MTAB-\d+`, etc.; Zenodo→`Zenodo \d+`; CELLxGENE→`cellxgene:<uuid>`; GitHub→`GitHub: owner/repo`; others→`repository: accession`. Prefer subseries or sub-datasets |
+| secondary_accession | string | **paper / API** | BioProject ID (PRJNAxxxxxx) or other project-level accession; for non-GEO repositories, obtain it from the paper or repository page; do not use superseries |
 | species | enum | **LLM** | human / mouse / other |
-| cell_type_original | string | **LLM** | 论文中的细胞类型原始命名（若source_type是cell_line，则无需填写此列） |
-| cell_type_standard | string | **LLM** | 细胞类型标准化命名，使用CellTypist命名体系（若source_type是cell_line，则无需填写此列） |
-| cell_type_markers | string | **LLM** | 结合 tissue、dataset context 和 cell_type 信息选择的 marker genes，用于识别或验证该细胞类型注释。可包含阳性和阴性 marker，例如 CD3E+, CD8A+, CD4-。若 source_type 为 cell_line，或该 benchmark 不涉及细胞类型注释，则无需填写。 |
-| tissue | string | **LLM** | 组织来源，如 Skin、Lung、Ovary |
+| cell_type_original | string | **LLM** | Original cell type name as written in the paper (leave blank if source_type is cell_line) |
+| cell_type_standard | string | **LLM** | Standardized cell type name using the CellTypist naming system (leave blank if source_type is cell_line) |
+| cell_type_markers | string | **LLM** | Marker genes selected using tissue, dataset context, and cell_type information to identify or validate the cell type annotation. May include positive and negative markers, e.g. CD3E+, CD8A+, CD4-. Leave blank if source_type is cell_line or the benchmark does not involve cell type annotation. |
+| tissue | string | **LLM** | Tissue origin, e.g. Skin, Lung, Ovary |
 | source_type | string | **LLM** | cell_line / organoid / primary_culture / patient_sample / PDX / co_culture_model |
-| cell_context | string | **LLM** | 简洁的样本背景，如 "human <mutation> <cancer_type> cell line" |
-| disease | string | **LLM** | 疾病或模型背景 |
-| platform | string | **LLM** / paper | 技术平台，如 10x Chromium、inDrop |
-| perturbation_type | string | **LLM** | 扰动类型，如 drug |
+| cell_context | string | **LLM** | Concise sample context, e.g. "human <mutation> <cancer_type> cell line" |
+| disease | string | **LLM** | Disease or model background |
+| platform | string | **LLM** / paper | Technology platform, e.g. 10x Chromium, inDrop |
+| perturbation_type | string | **LLM** | Perturbation type, e.g. drug |
 | perturbation_scope | enum | **LLM** | single / combination / both |
-| perturbation_name | string | **LLM** | 具体扰动名称 |
-| smiles | string | **smiles API** | 药物 SMILES（非小分子填空字符串） |
-| description | string | **LLM** | 一句话 benchmark 描述 |
-| control_type | string | **LLM** | 对照类型，如 untreated、DMSO、vehicle |
-| dose_design | enum | **LLM** | single（每个条件一个剂量）/ multi（同时多剂量） |
+| perturbation_name | string | **LLM** | Specific perturbation name |
+| smiles | string | **smiles API** | Drug SMILES (do not use placeholder or filler strings) |
+| description | string | **LLM** | One-sentence benchmark description |
+| control_type | string | **LLM** | Control type, e.g. untreated, DMSO, vehicle |
+| dose_design | enum | **LLM** | single (one dose per condition) / multi (multiple doses at once) |
 | time_design | enum | **LLM** | single / multi |
 
 ### Case-level fields
@@ -712,34 +712,34 @@ Print a summary:
 | Field | Type | Source | Description |
 |-------|------|--------|-------------|
 | test_id | string | **generated** | `<benchmark_id>_<Test_Index:02d>` via `gen-test-id` or `assign-ids` (Test_Index starts at 01 per benchmark). |
-| benchmark_id | string | **generated** | 关联 benchmark 主键 |
-| pmid | string | **paper** | 来源文献 PMID |
-| dataset_accession | string | **from benchmark** | 数据集编号 |
-| source_location | string | **LLM** | 原文图号或段落位置，如 "Extended Data Fig. 4f" |
-| original_statement | string | **LLM** | 原文原话，一字不改地复制。Must be a verbatim quote, not a paraphrase or synthesized sentence. |
-| drug | string | **LLM** | 药物或处理名称 |
-| cell_type | string | **LLM** | 细胞类型含疾病背景，如 "<cell_line> <mutation> <cancer_type> cell line" |
-| target_genes | list[string] | **LLM** | 基因列表，JSON 数组格式。Contains ALL genes sharing the same direction and conditions. Single: `["GENE1"]`; multi: `["GENE1","GENE2","GENE3"]`. |
+| benchmark_id | string | **generated** | Linked benchmark primary key |
+| pmid | string | **paper** | PMID of the source paper |
+| dataset_accession | string | **from benchmark** | Dataset accession |
+| source_location | string | **LLM** | Figure number or passage location in the paper, e.g. "Extended Data Fig. 4f" |
+| original_statement | string | **LLM** | Verbatim quote from the paper, copied character by character. Must be a verbatim quote, not a paraphrase or synthesized sentence. |
+| drug | string | **LLM** | Drug or treatment name |
+| cell_type | string | **LLM** | Cell type with disease context, e.g. "<cell_line> <mutation> <cancer_type> cell line" |
+| target_genes | list[string] | **LLM** | Gene list in JSON array format. Contains ALL genes sharing the same direction and conditions. Single: `["GENE1"]`; multi: `["GENE1","GENE2","GENE3"]`. |
 | target_type | enum | **LLM** | gene / gene_set / pathway / cell_state |
-| target_id | string | **LLM** | 单基因用基因名；多基因用基因名拼接（如 `GENE_A_GENE_B_GENE_C`）；gene_set 用 paper_defined_ 前缀 |
-| perturb_var | enum | **LLM** | 主要比较维度。**仅允许三个值：`dose` / `time` / `resistance_status`**。禁止填 `treatment`、`drug`、`condition` 等其他值。多剂量实验用 `dose`；治疗前后比较用 `time`；耐药/敏感状态比较用 `resistance_status` |
-| control | string | **LLM** | 对照组定义，如 "C"、"untreated" |
-| dose_groups | list[string] | **LLM** | 剂量组标签，JSON 格式，如 ["1.0 uM","2.0 uM","4.0 uM"] |
-| time_groups | list[string] | **LLM** | 时间组，必须以天(day)为单位，如 ["1 day"]、["14 day"] |
+| target_id | string | **LLM** | Single gene: use the gene symbol; multi-gene: concatenate gene names with underscores (e.g. `GENE_A_GENE_B_GENE_C`); gene_set: use the `paper_defined_` prefix |
+| perturb_var | enum | **LLM** | Main comparison dimension. **Only three values are allowed: `dose` / `time` / `resistance_status`**. Do not use `treatment`, `drug`, `condition`, or other values. Use `dose` for multi-dose experiments; `time` for before/after treatment comparisons; `resistance_status` for resistant/sensitive status comparisons |
+| control | string | **LLM** | Control group definition, e.g. "C", "untreated" |
+| dose_groups | list[string] | **LLM** | Dose group labels in JSON format, e.g. ["1.0 uM","2.0 uM","4.0 uM"] |
+| time_groups | list[string] | **LLM** | Time groups; must be in day units, e.g. ["1 day"], ["14 day"] |
 | relation | string | **LLM** | UP / DOWN / SERIES_UP / SERIES_DOWN |
-| comparison | string | **LLM** | 描述实际比较设计，如 "dose-escalation trend relative to C" |
-| gene_set_source | string | **LLM** | singleton_target / 具体图表引用（如 "Extended Data Fig. 4f paper-defined marker set"） |
-| has_quantitative_support | bool | **LLM** | 是否有定量支持 |
-| quantitative_support_type | list[string] | **LLM** | JSON 格式，如 ["expression_comparison","cluster_DE_support"] |
-| quantitative_support_detail | string | **LLM** | 定量支持的具体说明 |
-| response_timescale | string | **LLM** | 原文中的时间尺度描述 |
-| experiment_design | string | **LLM** | 该 case 对应的实验设计摘要 |
-| is_dose_response | bool | **LLM** | 是否为多剂量 case |
-| paper_dose_index | list[string] | **LLM** | 论文原始剂量标签，JSON 格式 |
-| is_time_response | bool | **LLM** | 是否为时间趋势 case |
+| comparison | string | **LLM** | Describes the actual comparison design, e.g. "dose-escalation trend relative to C" |
+| gene_set_source | string | **LLM** | singleton_target / specific figure or table reference (e.g. "Extended Data Fig. 4f paper-defined marker set") |
+| has_quantitative_support | bool | **LLM** | Whether there is quantitative support |
+| quantitative_support_type | list[string] | **LLM** | JSON format, e.g. ["expression_comparison","cluster_DE_support"] |
+| quantitative_support_detail | string | **LLM** | Specific description of the quantitative support |
+| response_timescale | string | **LLM** | Time-scale description from the paper |
+| experiment_design | string | **LLM** | Summary of the experimental design for this case |
+| is_dose_response | bool | **LLM** | Whether this is a multi-dose case |
+| paper_dose_index | list[string] | **LLM** | Paper's original dose labels in JSON format |
+| is_time_response | bool | **LLM** | Whether this is a time-trend case |
 | time_mode | enum | **LLM** | single / multi |
-| paper_time_index | list[string] | **LLM** | 原始时间标签，JSON 格式 |
-| notes | string | **LLM** | 备注。Must include a brief testability confirmation or flag specific issues (proportion claim, modality mismatch, response stratification). See Claim Testability Checks. |
+| paper_time_index | list[string] | **LLM** | Original time labels in JSON format |
+| notes | string | **LLM** | Notes. Must include a brief testability confirmation or flag specific issues (proportion claim, modality mismatch, response stratification). See Claim Testability Checks. |
 
 ## Common Pitfalls
 

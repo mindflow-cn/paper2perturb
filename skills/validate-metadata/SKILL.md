@@ -39,15 +39,15 @@ Run deterministic field validation, then verify whether metadata rows for one PM
    - Use `rg` for keywords from the table, including drug, cell line, accession, conditions, figure/table labels, genes, dose, and time.
 
 4. **Drug perturbation scope check** (LLM-based, not a Python rule):
-   - **Goal**: Keep only benchmarks that are same-cell drug treatment before/after (同一类细胞用药前后). Exclude three categories:
-     - **Drug resistance testing** (耐药性检测): experiments comparing sensitive vs. resistant lines, drug-adapted cells, drug-tolerant persisters, dose-escalation-derived resistance, or survival under drug selection.
-     - **Genetic perturbation** (基因扰动): CRISPR, shRNA, ORF overexpression, or similar non-drug interventions.
-     - **Cross-cluster data** (不同聚类的用药数据): comparisons that span different cell clusters, subpopulations, or subtypes rather than a single cell type before and after drug treatment.
+   - **Goal**: Keep only benchmarks that are same-cell drug treatment before/after. Exclude three categories:
+     - **Drug resistance testing**: experiments comparing sensitive vs. resistant lines, drug-adapted cells, drug-tolerant persisters, dose-escalation-derived resistance, or survival under drug selection.
+     - **Genetic perturbation**: CRISPR, shRNA, ORF overexpression, or similar non-drug interventions.
+     - **Cross-cluster data**: comparisons that span different cell clusters, subpopulations, or subtypes rather than a single cell type before and after drug treatment.
    - **How to check**: Read the benchmark's `perturbation_type`, `comparison_type`, `description`, and any `test_case.paper_reference_content` from the paper. Use the LLM to make a semantic judgment — do NOT rely on keyword matching alone. A description that says "tolerance" could still be a valid treatment time course; a description that says "A375 treated with dabrafenib" could still be a dose-escalation resistance study (read the paper to tell). The key question: *Is this the same cell population, before and after drug exposure, measuring the drug's effect (not resistance acquisition)?*
-   - **Output**: If the benchmark falls into any excluded category, report it as `不适用` with the reason (e.g. "耐药性检测 — sensitive vs resistant comparison") and skip further checks for that benchmark. Only proceed to step 5 for benchmarks that pass this filter.
+   - **Output**: If the benchmark falls into any excluded category, report it as `not_applicable` with the reason (e.g. "drug resistance testing — sensitive vs resistant comparison") and skip further checks for that benchmark. Only proceed to step 5 for benchmarks that pass this filter.
 
 5. **Cell type singularity check** (LLM-based):
-   - **Goal**: Each benchmark must involve exactly **one cell type** (一种细胞). A benchmark is defined as: one cell type × one drug → gene expression changes. If a row covers multiple distinct cell types, it must be split into separate benchmarks.
+   - **Goal**: Each benchmark must involve exactly **one cell type**. A benchmark is defined as: one cell type × one drug → gene expression changes. If a row covers multiple distinct cell types, it must be split into separate benchmarks.
    - **What to check**: Read `cell_type_original`, `cell_type_standard`, `sample_system`, `cell_context`, and the paper text. Determine whether the benchmark uses a single homogeneous cell population or mixes multiple different cell types. Examples that violate this rule:
      - Multiple cell lines pooled together in one benchmark (e.g. "A375 and MCF7 treated with drug X")
      - A mixture of different primary cell types (e.g. "T cells and B cells from patient")
@@ -55,7 +55,7 @@ Run deterministic field validation, then verify whether metadata rows for one PM
      - "PBMC" without subsetting to a specific cell type
    - **What passes**: A single named cell line (e.g. "A375", "PC9", "MCF7"), a single primary cell type (e.g. "CD8+ T cells", "hepatocytes"), or a single PDX-derived population.
    - **How to check**: Use the LLM to read the paper and determine whether the experimental design involves one cell type or multiple. Do NOT rely on the column value alone — the paper may reveal additional cell types not recorded in the table. The key question: *Is this experiment performed on exactly one cell type, treated with one drug, measuring that cell type's gene response?*
-   - **Output**: If multiple cell types are detected, report as `需拆分` with the list of cell types identified, and suggest splitting into separate benchmarks. The benchmark fails this check and should not proceed to detailed field verification until split.
+   - **Output**: If multiple cell types are detected, report as `needs_split` with the list of cell types identified, and suggest splitting into separate benchmarks. The benchmark fails this check and should not proceed to detailed field verification until split.
 
 6. Check benchmark-level fields:
    - Confirm `dataset_accession`, `secondary_accession`, `species`, `cell_type_original`, `cell_type_standard`, `tissue`, `source_type`, `cell_context`, `disease`, `platform`, `perturbation_type`, `perturbation_scope`, `perturbation_name`, `description`, `control_type`, `dose_design`, and `time_design` when present.
@@ -143,11 +143,11 @@ Use `nl -ba <paper.md> | sed -n '<start>,<end>p'` to capture line-numbered evide
 
 Respond in Chinese when the user asks in Chinese. Keep the answer concise and list only problems:
 
-- `不适用`: benchmark falls outside the drug-perturbation-only scope (耐药性检测 / 基因扰动 / 不同聚类用药), skip remaining checks.
-- `需拆分`: benchmark covers multiple cell types (多种细胞), must be split into separate single-cell-type benchmarks.
-- `未直接找到`: exact field/value is not explicitly present in the paper.
-- `证据不足`: related evidence exists but does not prove the row's exact claim.
-- `不一致`: paper contradicts the row.
+- `not_applicable`: benchmark falls outside the drug-perturbation-only scope (drug resistance testing / genetic perturbation / cross-cluster drug data), skip remaining checks.
+- `needs_split`: benchmark covers multiple cell types, must be split into separate single-cell-type benchmarks.
+- `not_found_directly`: exact field/value is not explicitly present in the paper.
+- `insufficient_evidence`: related evidence exists but does not prove the row's exact claim.
+- `inconsistent`: paper contradicts the row.
 
 For each issue, include:
 
